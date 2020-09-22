@@ -160,8 +160,8 @@ class _VideoPlayer {
   void initialize() {
     videoElement = VideoElement()
       ..src = uri
-      ..autoplay = false
-      ..controls = false
+      ..autoplay = true
+      ..controls = true
       ..style.border = 'none';
 
     // Allows Safari iOS to play the video inline
