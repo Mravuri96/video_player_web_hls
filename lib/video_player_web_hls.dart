@@ -44,7 +44,7 @@ class VideoPlayerPluginHls extends VideoPlayerPlatform {
     VideoPlayerPlatform.instance = VideoPlayerPluginHls();
   }
 
-  Map<int, _VideoPlayer> _videoPlayers = <int, _VideoPlayer>{};
+  final Map<int, _VideoPlayer> _videoPlayers = <int, _VideoPlayer>{};
 
   int _textureCounter = 1;
 
@@ -57,7 +57,6 @@ class VideoPlayerPluginHls extends VideoPlayerPlatform {
   Future<void> dispose(int textureId) async {
     _videoPlayers[textureId].dispose();
     _videoPlayers.remove(textureId);
-    return null;
   }
 
   void _disposeAllPlayers() {
@@ -68,7 +67,7 @@ class VideoPlayerPluginHls extends VideoPlayerPlatform {
 
   @override
   Future<int> create(DataSource dataSource) async {
-    final int textureId = _textureCounter;
+    final textureId = _textureCounter;
     _textureCounter++;
 
     String uri;
@@ -79,7 +78,7 @@ class VideoPlayerPluginHls extends VideoPlayerPlatform {
         uri = dataSource.uri;
         break;
       case DataSourceType.asset:
-        String assetUrl = dataSource.asset;
+        var assetUrl = dataSource.asset;
         if (dataSource.package != null && dataSource.package.isNotEmpty) {
           assetUrl = 'packages/${dataSource.package}/$assetUrl';
         }
@@ -93,12 +92,10 @@ class VideoPlayerPluginHls extends VideoPlayerPlatform {
             'web implementation of video_player cannot play local files'));
     }
 
-    final _VideoPlayer player = _VideoPlayer(
+    final player = _VideoPlayer(
       uri: uri,
       textureId: textureId,
-    );
-
-    player.initialize();
+    )..initialize();
 
     _videoPlayers[textureId] = player;
     return textureId;
@@ -180,36 +177,37 @@ class _VideoPlayer {
         'videoPlayer-$textureId', (int viewId) => videoElement);
     if (isSupported() && uri.toString().contains("m3u8")) {
       try {
-        Hls hls = new Hls();
-        hls.attachMedia(videoElement);
-
-        hls.on('hlsMediaAttached', allowInterop((_, __) {
-          hls.loadSource(uri.toString());
-        }));
-        hls.on('hlsError', allowInterop((_, dynamic data) {
-          eventController.addError(PlatformException(
-            code: _kErrorValueToErrorName[2],
-            message: _kDefaultErrorMessage,
-            details: _kErrorValueToErrorDescription[5],
-          ));
-        }));
-        videoElement.onCanPlay.listen((dynamic _) {
+        final hls = Hls();
+        hls
+          ..attachMedia(videoElement)
+          ..on('hlsMediaAttached', allowInterop((_, __) {
+            hls.loadSource(uri.toString());
+          }))
+          ..on('hlsError', allowInterop((_, data) {
+            eventController.addError(PlatformException(
+              code: _kErrorValueToErrorName[2],
+              message: _kDefaultErrorMessage,
+              details: _kErrorValueToErrorDescription[5],
+            ));
+          }));
+        videoElement.onCanPlay.listen((_) {
           if (!isInitialized) {
             isInitialized = true;
             sendInitialized();
           }
         });
-      } catch (e) {
+      } on NoScriptTagException {
         throw NoScriptTagException();
       }
     } else {
-      videoElement.src = uri.toString();
-      videoElement.addEventListener('loadedmetadata', (_) {
-        if (!isInitialized) {
-          isInitialized = true;
-          sendInitialized();
-        }
-      });
+      videoElement
+        ..src = uri.toString()
+        ..addEventListener('loadedmetadata', (_) {
+          if (!isInitialized) {
+            isInitialized = true;
+            sendInitialized();
+          }
+        });
     }
 
     // The error event fires when some form of error occurs while attempting to load or perform the media.
@@ -217,7 +215,7 @@ class _VideoPlayer {
       // The Event itself (_) doesn't contain info about the actual error.
       // We need to look at the HTMLMediaElement.error.
       // See: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/error
-      MediaError error = videoElement.error;
+      final error = videoElement.error;
       eventController.addError(PlatformException(
         code: _kErrorValueToErrorName[error.code],
         message: error.message != '' ? error.message : _kDefaultErrorMessage,
@@ -225,7 +223,7 @@ class _VideoPlayer {
       ));
     });
 
-    videoElement.onEnded.listen((dynamic _) {
+    videoElement.onEnded.listen((_) {
       eventController.add(VideoEvent(eventType: VideoEventType.completed));
     });
   }
@@ -244,7 +242,7 @@ class _VideoPlayer {
       // playback for any reason, such as permission issues.
       // The rejection handler is called with a DomException.
       // See: https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/play
-      DomException exception = e;
+      final exception = e;
       eventController.addError(PlatformException(
         code: exception.name,
         message: exception.message,
@@ -270,7 +268,7 @@ class _VideoPlayer {
   }
 
   void setPlaybackSpeed(double speed) {
-    assert(speed > 0);
+    assert(speed > 0, 'Playback has to be greater than 0');
 
     videoElement.playbackRate = speed;
   }
@@ -299,13 +297,14 @@ class _VideoPlayer {
   }
 
   void dispose() {
-    videoElement.removeAttribute('src');
-    videoElement.load();
+    videoElement
+      ..removeAttribute('src')
+      ..load();
   }
 
   List<DurationRange> _toDurationRange(TimeRanges buffered) {
-    final List<DurationRange> durationRange = <DurationRange>[];
-    for (int i = 0; i < buffered.length; i++) {
+    final durationRange = <DurationRange>[];
+    for (var i = 0; i < buffered.length; i++) {
       durationRange.add(DurationRange(
         Duration(milliseconds: (buffered.start(i) * 1000).round()),
         Duration(milliseconds: (buffered.end(i) * 1000).round()),

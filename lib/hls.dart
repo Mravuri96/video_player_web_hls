@@ -5,7 +5,7 @@ import 'dart:html';
 
 import 'package:js/js.dart';
 
-@JS("Hls.isSupported")
+@JS('Hls.isSupported')
 external bool isSupported();
 
 @JS()
