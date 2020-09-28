@@ -1,7 +1,6 @@
 include: linter_rules.yaml
 
 analyzer:
-  exclude: [lib/*/*.g.dart, lib/*/*.freezed.dart, ]
   strong-mode:
     implicit-casts: true
     implicit-dynamic: true
@@ -40,3 +39,4 @@ linter:
     # Not quite suitable for Flutter, which may have a `build` method with a single
     # return, but that return is still complex enough that a "body" is worth it.
     prefer_expression_function_bodies: false
+    undefined_prefixed_name: ignore

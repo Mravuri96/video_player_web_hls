@@ -18,13 +18,13 @@ dependencies:
     sdk: flutter
   flutter_web_plugins:
     sdk: flutter
-  meta: ^1.1.7
+  meta: ^1.2.3
   video_player_platform_interface: ^2.2.0
-  js: ^0.6.1+1
+  js: ^0.6.2
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  pedantic: ^1.8.0
+  pedantic: ^1.9.2
 
 environment:
   sdk: ">=2.1.0 <3.0.0"

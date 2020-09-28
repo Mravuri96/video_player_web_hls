@@ -1,15 +1,22 @@
-import 'dart:async';
-import 'dart:html';
+import 'dart:async' show Future, Stream, StreamController;
+import 'dart:html' show DomException, Event, TimeRanges, VideoElement;
 import 'dart:ui' as ui;
 
-import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import 'package:flutter_web_plugins/flutter_web_plugins.dart';
-import 'package:js/js.dart';
-import 'package:video_player_platform_interface/video_player_platform_interface.dart';
+import 'package:flutter/material.dart' show HtmlElementView, Size, Widget;
+import 'package:flutter/services.dart' show PlatformException;
+import 'package:flutter_web_plugins/flutter_web_plugins.dart' show Registrar;
+import 'package:js/js.dart' show allowInterop;
+import 'package:video_player_platform_interface/video_player_platform_interface.dart'
+    show
+        DataSource,
+        DataSourceType,
+        DurationRange,
+        VideoEvent,
+        VideoEventType,
+        VideoPlayerPlatform;
 
-import 'hls.dart';
-import 'no_script_tag_exception.dart';
+import 'hls.dart' show Hls, isSupported;
+import 'no_script_tag_exception.dart' show NoScriptTagException;
 
 // An error code value to error name Map.
 // See: https://developer.mozilla.org/en-US/docs/Web/API/MediaError/code
@@ -156,26 +163,26 @@ class _VideoPlayer {
   final StreamController<VideoEvent> eventController =
       StreamController<VideoEvent>();
 
-  final String uri;
-  final int textureId;
-  VideoElement videoElement;
   bool isInitialized = false;
+  final int textureId;
+  final String uri;
+  VideoElement videoElement;
 
   void initialize() {
     videoElement = VideoElement()
       ..src = uri
       ..autoplay = true
       ..controls = true
-      ..style.border = 'none';
+      ..style.border = 'none'
 
-    // Allows Safari iOS to play the video inline
-    videoElement.setAttribute('playsinline', 'true');
+      // Allows Safari iOS to play the video inline
+      ..setAttribute('playsinline', 'true');
 
     // TODO(hterkelsen): Use initialization parameters once they are available
     // ignore: undefined_prefixed_name
     ui.platformViewRegistry.registerViewFactory(
         'videoPlayer-$textureId', (int viewId) => videoElement);
-    if (isSupported() && uri.toString().contains("m3u8")) {
+    if (isSupported() && uri.toString().contains('m3u8')) {
       try {
         final hls = Hls();
         hls
