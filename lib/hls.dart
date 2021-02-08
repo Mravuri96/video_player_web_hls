@@ -16,7 +16,7 @@ class Hls {
   external void loadSource(String videoSrc);
 
   @JS()
-  external void attachMedia(VideoElement video);
+  external void attachMedia(VideoElement? video);
 
   @JS()
   external on(String event, Function callback);
